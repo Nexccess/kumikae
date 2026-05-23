@@ -24,16 +24,20 @@ type SelectedParts = Partial<Record<PartCategory, Part>>;
 type KumikaeStore = {
   selectedParts: SelectedParts;
   roomData: { width: number; depth: number; height: number } | null;
+  isFading: boolean;
   setPart: (category: PartCategory, part: Part) => void;
   setRoomData: (data: { width: number; depth: number; height: number }) => void;
   resetParts: () => void;
+  setFading: (v: boolean) => void;
 };
 
 export const useKumikaeStore = create<KumikaeStore>((set) => ({
   selectedParts: {},
   roomData: null,
+  isFading: false,
   setPart: (category, part) =>
     set((state) => ({ selectedParts: { ...state.selectedParts, [category]: part } })),
   setRoomData: (data) => set({ roomData: data }),
   resetParts: () => set({ selectedParts: {} }),
+  setFading: (v) => set({ isFading: v }),
 }));
