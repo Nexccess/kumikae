@@ -29,38 +29,48 @@ export async function fetchDiagnosis(input: DiagnosisInput): Promise<DiagnosisRe
 返答フォーマット（このJSONのみ。他の文字列は禁止）:
 {"feature":"ユーザーの価値観を1文で","analysis":"判断根拠を2文で","judgment":"投資視点と生活視点の違いを踏まえた最終判断を1文で"}`;
 
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
-        }),
-      }
-    );
+  const models = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+  ];
 
-    const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  for (const model of models) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
+          }),
+        }
+      );
 
-    // バッククォート・改行・制御文字を除去してJSONを抽出
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('JSON not found');
+      if (!res.ok) continue;
 
-    const parsed = JSON.parse(jsonMatch[0]);
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) continue;
 
-    return {
-      feature:  parsed.feature  ?? '解析できませんでした',
-      analysis: parsed.analysis ?? raw,
-      judgment: parsed.judgment ?? '再試行してください',
-    };
-  } catch (e) {
-    return {
-      feature:  'エラーが発生しました',
-      analysis: String(e),
-      judgment: 'APIキーまたはネットワークを確認してください',
-    };
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        feature:  parsed.feature  ?? '解析できませんでした',
+        analysis: parsed.analysis ?? raw,
+        judgment: parsed.judgment ?? '再試行してください',
+      };
+    } catch {
+      continue;
+    }
   }
+
+  return {
+    feature:  'エラーが発生しました',
+    analysis: '利用可能なモデルが見つかりませんでした',
+    judgment: 'APIキーまたはネットワークを確認してください',
+  };
 }
