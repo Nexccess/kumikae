@@ -10,14 +10,12 @@ export default function App() {
   const isFading = useKumikaeStore((s) => s.isFading);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#ede4d8', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100vh', background: '#5a7a3a', position: 'relative' }}>
 
-      {/* 3D空間（フェードトランジション付き） */}
       <div style={{ position: 'absolute', inset: 0, opacity: isFading ? 0 : 1, transition: 'opacity 0.3s ease' }}>
         <ThreeCanvas />
       </div>
 
-      {/* UIレイヤー */}
       <RoomLoader />
       <PartSelector />
       <ScorePanel />
