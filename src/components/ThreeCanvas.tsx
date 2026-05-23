@@ -17,6 +17,8 @@ const Floor: React.FC<{ width: number; depth: number }> = ({ width, depth }) => 
         color={floorPart?.color ?? '#e8ddd0'}
         roughness={floorPart?.roughness ?? 0.8}
         metalness={floorPart?.metalness ?? 0.0}
+        transparent
+        opacity={1}
       />
     </mesh>
   );
